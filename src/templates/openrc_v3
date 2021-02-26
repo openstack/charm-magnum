@@ -1,0 +1,10 @@
+# Service credentials for Keystone v3
+export OS_REGION_NAME={{ region }}
+export OS_PASSWORD={{ admin_password }}
+export OS_AUTH_URL={{ auth_protocol }}://{{ auth_host }}:{{ auth_port }}/v3
+export OS_USERNAME={{ admin_user }}
+export OS_TENANT_NAME={{ admin_tenant_name }}
+export OS_PROJECT_DOMAIN_NAME={{ admin_domain_name }}
+export OS_USER_DOMAIN_NAME={{ admin_domain_name }}
+export OS_PROJECT_NAME={{ admin_tenant_name }}
+export OS_IDENTITY_API_VERSION=3

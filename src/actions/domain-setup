@@ -1,0 +1,37 @@
+#!/bin/bash
+
+set -e
+
+if [ ! -e /root/openrc_v3 ]
+then
+    juju-log "Openstack credentials not yet available"
+    exit 0
+fi
+
+. /root/openrc_v3
+
+CFG_DOMAIN=`config-get trustee-domain`
+CFG_USERNAME=`config-get trustee-admin`
+
+DOMAIN=${CFG_DOMAIN:-magnum}
+USERNAME=${CFG_USERNAME:-magnum_domain_admin}
+OPENSTACK_CMD="/usr/bin/openstack"
+MAGNUM_PASSWORD=$(leader-get magnum_password)
+
+if [ -z $MAGNUM_PASSWORD ]
+then
+    juju-log "magnum_password not set in leader data"
+    exit 0
+fi
+
+$OPENSTACK_CMD domain show $DOMAIN || {
+    $OPENSTACK_CMD domain create --description "Magnum trustee domain" $DOMAIN
+}
+
+$OPENSTACK_CMD user show --domain $DOMAIN $USERNAME || {
+    $OPENSTACK_CMD user create --domain $DOMAIN --password $MAGNUM_PASSWORD $USERNAME
+}
+
+$OPENSTACK_CMD role add --domain $DOMAIN --user-domain $DOMAIN --user $USERNAME admin || {
+    $OPENSTACK_CMD role add --domain $DOMAIN --user $USERNAME admin
+}

@@ -1,0 +1,25 @@
+charm_name: magnum
+
+smoke_bundles:
+- focal-victoria
+
+gate_bundles:
+- bionic-ussuri
+- focal-ussuri
+- focal-victoria
+
+configure:
+- zaza.openstack.charm_tests.vault.setup.auto_initialize
+- zaza.openstack.charm_tests.glance.setup.add_cirros_image
+- zaza.openstack.charm_tests.keystone.setup.add_demo_user
+- zaza.openstack.charm_tests.neutron.setup.basic_overcloud_network
+- zaza.openstack.charm_tests.nova.setup.create_flavors
+- zaza.openstack.charm_tests.nova.setup.manage_ssh_key
+
+tests:
+- zaza.openstack.charm_tests.nova.tests.CirrosGuestCreateTest
+
+target_deploy_status:
+  vault:
+    workload-status: blocked
+    workload-status-message: Vault needs to be initialized

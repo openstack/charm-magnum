@@ -1,0 +1,3 @@
+domain-setup:
+  description:
+    Setup the keystone domain and user required for Magnum to operate.

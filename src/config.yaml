@@ -1,0 +1,60 @@
+options:
+  openstack-origin:
+    default: distro
+    type: string
+    description: |
+      Repository from which to install.  May be one of the following:
+      distro (default), ppa:somecustom/ppa, a deb url sources entry,
+      or a supported Cloud Archive release pocket.
+
+      Supported Cloud Archive sources include: cloud:precise-folsom,
+      cloud:precise-folsom/updates, cloud:precise-folsom/staging,
+      cloud:precise-folsom/proposed.
+
+      Note that updating this setting to a source that is known to
+      provide a later version of OpenStack will trigger a software
+      upgrade.
+  rabbit-user:
+    default: magnum
+    type: string
+    description: Username used to access rabbitmq queue
+  rabbit-vhost:
+    default: openstack
+    type: string
+    description: Rabbitmq vhost
+  database-user:
+    default: magnum
+    type: string
+    description: Username for Magnum database access
+  database:
+    default: magnum
+    type: string
+    description: Database name for Magnum
+  debug:
+    default: False
+    type: boolean
+    description: Enable debug logging
+  verbose:
+    default: False
+    type: boolean
+    description: Enable verbose logging
+  region:
+    default: RegionOne
+    type: string
+    description: OpenStack Region
+  trustee-domain:
+    type: string
+    default: magnum
+    description: Domain used for COE
+  trustee-admin:
+    type: string
+    default: magnum_domain_admin
+    description: Domain admin for the trustee-domain
+  cert-manager-type:
+    type: string
+    default: barbican
+    description: |
+      Certificate Manager plugin. Use barbican in production. Requires barbican
+      to be present in your OpenStack deployment. Choices are:
+        * x509keypair
+        * barbican

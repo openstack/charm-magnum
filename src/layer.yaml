@@ -1,0 +1,11 @@
+includes:
+  - layer:openstack-api
+  - layer:leadership
+  - interface:mysql-shared
+  - interface:rabbitmq
+  - interface:keystone
+repo: https://github.com/oprinmarius/charm-magnum
+options:
+  basic:
+    use_venv: true
+    include_system_packages: true
