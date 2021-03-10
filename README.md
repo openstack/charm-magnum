@@ -1,2 +1,1 @@
-# charm-magnum
-OpenStack Magnum Juju charm
+src/README.md
