@@ -26,6 +26,8 @@ machines:
   '11':
   '12':
   '13':
+  '14':
+  '15':
 
 applications:
 
@@ -123,11 +125,20 @@ applications:
 
   magnum:
     charm: ../../../magnum
-    num_units: 1
+    num_units: 3
     options:
       openstack-origin: *openstack-origin
     to:
       - '11'
+      - '12'
+      - '13'
+
+  magnum-hacluster:
+    charm: cs:~openstack-charmers-next/hacluster
+    num_units: 0
+    options:
+      corosync_transport: unicast
+      cluster_count: 3
 
   heat:
     charm: cs:~openstack-charmers-next/heat
@@ -135,7 +146,7 @@ applications:
     options:
       openstack-origin: *openstack-origin
     to:
-      - '12'
+      - '14'
 
   barbican:
     charm: cs:~openstack-charmers-next/barbican
@@ -143,7 +154,7 @@ applications:
     options:
       openstack-origin: *openstack-origin
     to:
-      - '13'
+      - '15'
 
 relations:
 
@@ -242,6 +253,9 @@ relations:
 
   - - 'magnum:certificates'
     - 'vault:certificates'
+
+  - - 'magnum:ha'
+    - 'magnum-hacluster:ha'
 
   - - 'heat:amqp'
     - 'rabbitmq-server:amqp'
