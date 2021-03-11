@@ -28,6 +28,7 @@ charm.use_defaults(
 @reactive.when('shared-db.available')
 @reactive.when('identity-service.available')
 @reactive.when('amqp.available')
+@reactive.when_not('is-update-status-hook')
 def render_config(*interfaces):
     with charm.provide_charm_instance() as magnum_charm:
         magnum_charm.render_with_interfaces(interfaces)
@@ -39,21 +40,26 @@ def render_config(*interfaces):
 @reactive.when('shared-db.available')
 @reactive.when('identity-service.available')
 @reactive.when('amqp.available')
+@reactive.when_not('is-update-status-hook')
 def render_config_with_certs(amqp, keystone, shared_db, certs):
     with charm.provide_charm_instance() as magnum_charm:
         magnum_charm.configure_tls(certs)
         magnum_charm.render_with_interfaces(
             [amqp, keystone, shared_db, certs])
+        magnum_charm.assess_status()
+    reactive.set_state('config.complete')
 
 
 @reactive.when('identity-service.connected')
+@reactive.when_not('is-update-status-hook')
 def setup_endpoint(keystone):
     magnum.setup_endpoint(keystone)
     magnum.assess_status()
 
 
-@reactive.when_not('leadership.set.magnum_password')
 @reactive.when('leadership.is_leader')
+@reactive.when_not('leadership.set.magnum_password')
+@reactive.when_not('is-update-status-hook')
 def generate_magnum_password():
     passwd = binascii.b2a_hex(os.urandom(32)).decode()
     leadership.leader_set({'magnum_password': passwd})
@@ -62,6 +68,7 @@ def generate_magnum_password():
 @reactive.when('leadership.set.magnum_password')
 @reactive.when('leadership.is_leader')
 @reactive.when('identity-service.available')
+@reactive.when_not('is-update-status-hook')
 def write_openrc():
     config = hookenv.config()
     ctx = context.IdentityServiceContext()()
@@ -73,6 +80,7 @@ def write_openrc():
 
 @reactive.when('config.complete')
 @reactive.when_not('db.synced')
+@reactive.when_not('is-update-status-hook')
 def run_db_migration():
     with charm.provide_charm_instance() as magnum_charm:
         magnum_charm.db_sync()
@@ -83,6 +91,7 @@ def run_db_migration():
 
 @reactive.when('ha.connected')
 @reactive.when_not('ha.available')
+@reactive.when_not('is-update-status-hook')
 def connect_cluster(hacluster):
     with charm.provide_charm_instance() as magnum_charm:
         magnum_charm.configure_ha_resources(hacluster)
