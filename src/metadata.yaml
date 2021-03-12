@@ -1,6 +1,6 @@
 name: magnum
 summary: Openstack container component
-maintainer: Oprin Marius Cristian <moprin@cloudbasesolutions.com>
+maintainer: OpenStack Charmers <openstack-charmers@lists.ubuntu.com>
 description: |
   Magnum is an OpenStack API service developed by the OpenStack Containers Team making
   container orchestration engines such as Docker Swarm, Kubernetes, and Apache Mesos
