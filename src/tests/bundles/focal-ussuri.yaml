@@ -8,46 +8,66 @@ comment:
 machines:
   '0':
     constraints: mem=3072M
-    series: bionic
   '1':
+    constraints: mem=3072M
   '2':
+    constraints: mem=3072M
   '3':
   '4':
   '5':
   '6':
   '7':
+  '8':
+  '9':
   # the following machines are for nova-compute which needs more memory
   # for the instances.
-  '8':
-    constraints: mem=4096M cores=4
-  '9':
-    constraints: mem=4096M cores=4
   '10':
+    constraints: mem=4096M cores=4
   '11':
+    constraints: mem=4096M cores=4
   '12':
   '13':
   '14':
   '15':
+  '16':
+  '17':
 
 applications:
 
-  # TODO: This needs to be replaced with mysql-innodb-cluster + db routers,
-  # once https://bugs.launchpad.net/ubuntu/+source/magnum/+bug/1915734 is fixed.
-  percona-cluster:
-    charm: cs:~openstack-charmers-next/percona-cluster
-    num_units: 1
-    series: bionic
+  nova-cloud-controller-mysql-router:
+    charm: cs:~openstack-charmers-next/mysql-router
+  neutron-api-mysql-router:
+    charm: cs:~openstack-charmers-next/mysql-router
+  keystone-mysql-router:
+    charm: cs:~openstack-charmers-next/mysql-router
+  glance-mysql-router:
+    charm: cs:~openstack-charmers-next/mysql-router
+  placement-mysql-router:
+    charm: cs:~openstack-charmers-next/mysql-router
+  vault-mysql-router:
+    charm: cs:~openstack-charmers-next/mysql-router
+  magnum-mysql-router:
+    charm: cs:~openstack-charmers-next/mysql-router
+  heat-mysql-router:
+    charm: cs:~openstack-charmers-next/mysql-router
+  barbican-mysql-router:
+    charm: cs:~openstack-charmers-next/mysql-router
+
+  mysql-innodb-cluster:
+    charm: cs:~openstack-charmers-next/mysql-innodb-cluster
+    num_units: 3
     options:
-      max-connections: 1000
-      innodb-buffer-pool-size: 256M
+      source: *openstack-origin
     to:
       - '0'
+      - '1'
+      - '2'
 
   rabbitmq-server:
     charm: cs:~openstack-charmers-next/rabbitmq-server
     num_units: 1
     to:
-      - '1'
+      - '3'
 
   nova-cloud-controller:
     charm: cs:~openstack-charmers-next/nova-cloud-controller
@@ -56,7 +76,7 @@ applications:
       openstack-origin: *openstack-origin
       network-manager: Neutron
     to:
-      - '2'
+      - '4'
 
   neutron-api:
     charm: cs:~openstack-charmers-next/neutron-api
@@ -68,7 +88,7 @@ applications:
       flat-network-providers: physnet1
       neutron-security-groups: true
     to:
-      - '3'
+      - '5'
 
   keystone:
     charm: cs:~openstack-charmers-next/keystone
@@ -76,7 +96,7 @@ applications:
     options:
       openstack-origin: *openstack-origin
     to:
-      - '4'
+      - '6'
 
   neutron-gateway:
     charm: cs:~openstack-charmers-next/neutron-gateway
@@ -85,7 +105,7 @@ applications:
       openstack-origin: *openstack-origin
       bridge-mappings: physnet1:br-ex
     to:
-      - '5'
+      - '7'
 
   glance:
     charm: cs:~openstack-charmers-next/glance
@@ -93,7 +113,7 @@ applications:
     options:
       openstack-origin: *openstack-origin
     to:
-      - '6'
+      - '8'
 
   neutron-openvswitch:
     charm: cs:~openstack-charmers-next/neutron-openvswitch
@@ -104,7 +124,7 @@ applications:
     options:
       openstack-origin: *openstack-origin
     to:
-      - '7'
+      - '9'
 
   nova-compute:
     charm: cs:~openstack-charmers-next/nova-compute
@@ -114,14 +134,14 @@ applications:
     options:
       openstack-origin: *openstack-origin
     to:
-      - '8'
-      - '9'
+      - '10'
+      - '11'
 
   vault:
     charm: cs:~openstack-charmers-next/vault
     num_units: 1
     to:
-      - '10'
+      - '12'
 
   magnum:
     charm: ../../../magnum
@@ -129,9 +149,9 @@ applications:
     options:
       openstack-origin: *openstack-origin
     to:
-      - '11'
-      - '12'
       - '13'
+      - '14'
+      - '15'
 
   magnum-hacluster:
     charm: cs:~openstack-charmers-next/hacluster
@@ -146,7 +166,7 @@ applications:
     options:
       openstack-origin: *openstack-origin
     to:
-      - '14'
+      - '16'
 
   barbican:
     charm: cs:~openstack-charmers-next/barbican
@@ -154,7 +174,7 @@ applications:
     options:
       openstack-origin: *openstack-origin
     to:
-      - '15'
+      - '17'
 
 relations:
 
@@ -165,7 +185,9 @@ relations:
     - 'rabbitmq-server:amqp'
 
   - - 'nova-cloud-controller:shared-db'
-    - 'percona-cluster:shared-db'
+    - 'nova-cloud-controller-mysql-router:shared-db'
+  - - 'nova-cloud-controller-mysql-router:db-router'
+    - 'mysql-innodb-cluster:db-router'
 
   - - 'nova-cloud-controller:identity-service'
     - 'keystone:identity-service'
@@ -180,13 +202,16 @@ relations:
     - 'glance:image-service'
 
   - - 'keystone:shared-db'
-    - 'percona-cluster:shared-db'
-
+    - 'keystone-mysql-router:shared-db'
+  - - 'keystone-mysql-router:db-router'
+    - 'mysql-innodb-cluster:db-router'
   - - 'glance:identity-service'
     - 'keystone:identity-service'
 
   - - 'glance:shared-db'
-    - 'percona-cluster:shared-db'
+    - 'glance-mysql-router:shared-db'
+  - - 'glance-mysql-router:db-router'
+    - 'mysql-innodb-cluster:db-router'
 
   - - 'glance:amqp'
     - 'rabbitmq-server:amqp'
@@ -198,7 +223,9 @@ relations:
     - 'neutron-gateway:quantum-network-service'
 
   - - 'neutron-api:shared-db'
-    - 'percona-cluster:shared-db'
+    - 'neutron-api-mysql-router:shared-db'
+  - - 'neutron-api-mysql-router:db-router'
+    - 'mysql-innodb-cluster:db-router'
 
   - - 'neutron-api:amqp'
     - 'rabbitmq-server:amqp'
@@ -216,7 +243,9 @@ relations:
     - 'neutron-openvswitch:amqp'
 
   - - 'placement:shared-db'
-    - 'percona-cluster:shared-db'
+    - 'placement-mysql-router:shared-db'
+  - - 'placement-mysql-router:db-router'
+    - 'mysql-innodb-cluster:db-router'
 
   - - 'placement:identity-service'
     - 'keystone:identity-service'
@@ -225,7 +254,9 @@ relations:
     - 'nova-cloud-controller:placement'
 
   - - 'vault:shared-db'
-    - 'percona-cluster:shared-db'
+    - 'vault-mysql-router:shared-db'
+  - - 'vault-mysql-router:db-router'
+    - 'mysql-innodb-cluster:db-router'
 
   - - 'vault:certificates'
     - 'neutron-api:certificates'
@@ -243,7 +274,9 @@ relations:
     - 'placement:certificates'
 
   - - 'magnum:shared-db'
-    - 'percona-cluster:shared-db'
+    - 'magnum-mysql-router:shared-db'
+  - - 'magnum-mysql-router:db-router'
+    - 'mysql-innodb-cluster:db-router'
 
   - - 'magnum:amqp'
     - 'rabbitmq-server:amqp'
@@ -264,7 +297,9 @@ relations:
     - 'keystone:identity-service'
 
   - - 'heat:shared-db'
-    - 'percona-cluster:shared-db'
+    - 'heat-mysql-router:shared-db'
+  - - 'heat-mysql-router:db-router'
+    - 'mysql-innodb-cluster:db-router'
 
   - - 'heat:certificates'
     - 'vault:certificates'
@@ -276,7 +311,9 @@ relations:
     - 'keystone:identity-service'
 
   - - 'barbican:shared-db'
-    - 'percona-cluster:shared-db'
+    - 'barbican-mysql-router:shared-db'
+  - - 'barbican-mysql-router:db-router'
+    - 'mysql-innodb-cluster:db-router'
 
   - - 'barbican:certificates'
     - 'vault:certificates'

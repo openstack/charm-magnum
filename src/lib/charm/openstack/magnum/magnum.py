@@ -9,6 +9,7 @@ import charms_openstack.adapters as adapters
 import charms_openstack.ip as os_ip
 import charmhelpers.core.host as ch_host
 import charmhelpers.core.hookenv as ch_hookenv
+import charmhelpers.fetch as fetch
 
 
 PACKAGES = [
@@ -123,6 +124,26 @@ class MagnumCharm(charms_openstack.charm.HAOpenStackCharm):
     }
 
     group = "magnum"
+
+    # TODO: Remove this 'install' hook wrapper once the Magnum packages are
+    # fixed in the cloud archive / default repositories.
+    # We use a 3rd party PPA with custom Magnum packages (built against
+    # Magnum stable branch) because they include a couple of needed fixes.
+    # Due to the amount of changes needed to fix Magnum Ussuri, we went with
+    # the separate PPA to have the charm working.
+    # A good indication that Magnum is fixed in the cloud archive / default
+    # repositories, is removing this 'install' wrapper, and having the Zaza
+    # tests still passing.
+    def install(self):
+        custom_ppa_dict = {
+            'ussuri': 'ppa:openstack-charmers/magnum-ussuri',
+            'victoria': 'ppa:openstack-charmers/magnum-victoria',
+        }
+        ppa = custom_ppa_dict.get(self.application_version)
+        if ppa:
+            fetch.add_source(ppa, fail_invalid=True)
+            fetch.apt_update(fatal=True)
+        super().install()
 
     def get_amqp_credentials(self):
         """Provide the default amqp username and vhost as a tuple.
