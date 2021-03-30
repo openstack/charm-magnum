@@ -4,7 +4,7 @@ includes:
   - interface:mysql-shared
   - interface:rabbitmq
   - interface:keystone
-repo: https://github.com/oprinmarius/charm-magnum
+repo: https://github.com/openstack/charm-magnum
 options:
   basic:
     use_venv: true
