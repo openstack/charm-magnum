@@ -8,12 +8,13 @@ description: |
   OS image which contains Docker and Kubernetes and runs that image in either virtual
   machines or bare metal in a cluster configuration.
 tags:
-  - openstack
+- openstack
 series:
-  - bionic
-  - focal
-  - groovy
-  - hirsute
+- bionic
+- focal
+- groovy
+- hirsute
+- impish
 subordinate: false
 requires:
   shared-db:
