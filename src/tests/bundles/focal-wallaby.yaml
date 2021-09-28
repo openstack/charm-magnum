@@ -1,0 +1,319 @@
+variables:
+  openstack-origin: &openstack-origin cloud:focal-wallaby
+
+series: focal
+
+comment:
+- 'machines section to decide order of deployment. database sooner = faster'
+machines:
+  '0':
+    constraints: mem=3072M
+  '1':
+    constraints: mem=3072M
+  '2':
+    constraints: mem=3072M
+  '3':
+  '4':
+  '5':
+  '6':
+  '7':
+  '8':
+  '9':
+  # the following machines are for nova-compute which needs more memory
+  # for the instances.
+  '10':
+    constraints: mem=4096M cores=4
+  '11':
+    constraints: mem=4096M cores=4
+  '12':
+  '13':
+  '14':
+  '15':
+  '16':
+  '17':
+
+applications:
+
+  nova-cloud-controller-mysql-router:
+    charm: cs:~openstack-charmers-next/mysql-router
+  neutron-api-mysql-router:
+    charm: cs:~openstack-charmers-next/mysql-router
+  keystone-mysql-router:
+    charm: cs:~openstack-charmers-next/mysql-router
+  glance-mysql-router:
+    charm: cs:~openstack-charmers-next/mysql-router
+  placement-mysql-router:
+    charm: cs:~openstack-charmers-next/mysql-router
+  vault-mysql-router:
+    charm: cs:~openstack-charmers-next/mysql-router
+  magnum-mysql-router:
+    charm: cs:~openstack-charmers-next/mysql-router
+  heat-mysql-router:
+    charm: cs:~openstack-charmers-next/mysql-router
+  barbican-mysql-router:
+    charm: cs:~openstack-charmers-next/mysql-router
+
+  mysql-innodb-cluster:
+    charm: cs:~openstack-charmers-next/mysql-innodb-cluster
+    num_units: 3
+    options:
+      source: *openstack-origin
+    to:
+      - '0'
+      - '1'
+      - '2'
+
+  rabbitmq-server:
+    charm: cs:~openstack-charmers-next/rabbitmq-server
+    num_units: 1
+    to:
+      - '3'
+
+  nova-cloud-controller:
+    charm: cs:~openstack-charmers-next/nova-cloud-controller
+    num_units: 1
+    options:
+      openstack-origin: *openstack-origin
+      network-manager: Neutron
+    to:
+      - '4'
+
+  neutron-api:
+    charm: cs:~openstack-charmers-next/neutron-api
+    num_units: 1
+    options:
+      manage-neutron-plugin-legacy-mode: true
+      neutron-plugin: ovs
+      openstack-origin: *openstack-origin
+      flat-network-providers: physnet1
+      neutron-security-groups: true
+    to:
+      - '5'
+
+  keystone:
+    charm: cs:~openstack-charmers-next/keystone
+    num_units: 1
+    options:
+      openstack-origin: *openstack-origin
+    to:
+      - '6'
+
+  neutron-gateway:
+    charm: cs:~openstack-charmers-next/neutron-gateway
+    num_units: 1
+    options:
+      openstack-origin: *openstack-origin
+      bridge-mappings: physnet1:br-ex
+    to:
+      - '7'
+
+  glance:
+    charm: cs:~openstack-charmers-next/glance
+    num_units: 1
+    options:
+      openstack-origin: *openstack-origin
+    to:
+      - '8'
+
+  neutron-openvswitch:
+    charm: cs:~openstack-charmers-next/neutron-openvswitch
+
+  placement:
+    charm: cs:~openstack-charmers-next/placement
+    num_units: 1
+    options:
+      openstack-origin: *openstack-origin
+    to:
+      - '9'
+
+  nova-compute:
+    charm: cs:~openstack-charmers-next/nova-compute
+    num_units: 2
+    storage:
+      ephemeral-device: '40G'
+    options:
+      openstack-origin: *openstack-origin
+    to:
+      - '10'
+      - '11'
+
+  vault:
+    charm: cs:~openstack-charmers-next/vault
+    num_units: 1
+    to:
+      - '12'
+
+  magnum:
+    charm: ../../../magnum
+    num_units: 3
+    options:
+      openstack-origin: *openstack-origin
+    to:
+      - '13'
+      - '14'
+      - '15'
+
+  magnum-hacluster:
+    charm: cs:~openstack-charmers-next/hacluster
+    num_units: 0
+    options:
+      corosync_transport: unicast
+      cluster_count: 3
+
+  heat:
+    charm: cs:~openstack-charmers-next/heat
+    num_units: 1
+    options:
+      openstack-origin: *openstack-origin
+    to:
+      - '16'
+
+  barbican:
+    charm: cs:~openstack-charmers-next/barbican
+    num_units: 1
+    options:
+      openstack-origin: *openstack-origin
+    to:
+      - '17'
+
+relations:
+
+  - - 'nova-compute:image-service'
+    - 'glance:image-service'
+
+  - - 'nova-compute:amqp'
+    - 'rabbitmq-server:amqp'
+
+  - - 'nova-cloud-controller:shared-db'
+    - 'nova-cloud-controller-mysql-router:shared-db'
+  - - 'nova-cloud-controller-mysql-router:db-router'
+    - 'mysql-innodb-cluster:db-router'
+
+  - - 'nova-cloud-controller:identity-service'
+    - 'keystone:identity-service'
+
+  - - 'nova-cloud-controller:amqp'
+    - 'rabbitmq-server:amqp'
+
+  - - 'nova-cloud-controller:cloud-compute'
+    - 'nova-compute:cloud-compute'
+
+  - - 'nova-cloud-controller:image-service'
+    - 'glance:image-service'
+
+  - - 'keystone:shared-db'
+    - 'keystone-mysql-router:shared-db'
+  - - 'keystone-mysql-router:db-router'
+    - 'mysql-innodb-cluster:db-router'
+  - - 'glance:identity-service'
+    - 'keystone:identity-service'
+
+  - - 'glance:shared-db'
+    - 'glance-mysql-router:shared-db'
+  - - 'glance-mysql-router:db-router'
+    - 'mysql-innodb-cluster:db-router'
+
+  - - 'glance:amqp'
+    - 'rabbitmq-server:amqp'
+
+  - - 'neutron-gateway:amqp'
+    - 'rabbitmq-server:amqp'
+
+  - - 'nova-cloud-controller:quantum-network-service'
+    - 'neutron-gateway:quantum-network-service'
+
+  - - 'neutron-api:shared-db'
+    - 'neutron-api-mysql-router:shared-db'
+  - - 'neutron-api-mysql-router:db-router'
+    - 'mysql-innodb-cluster:db-router'
+
+  - - 'neutron-api:amqp'
+    - 'rabbitmq-server:amqp'
+
+  - - 'neutron-api:neutron-api'
+    - 'nova-cloud-controller:neutron-api'
+
+  - - 'neutron-api:identity-service'
+    - 'keystone:identity-service'
+
+  - - 'nova-compute:neutron-plugin'
+    - 'neutron-openvswitch:neutron-plugin'
+
+  - - 'rabbitmq-server:amqp'
+    - 'neutron-openvswitch:amqp'
+
+  - - 'placement:shared-db'
+    - 'placement-mysql-router:shared-db'
+  - - 'placement-mysql-router:db-router'
+    - 'mysql-innodb-cluster:db-router'
+
+  - - 'placement:identity-service'
+    - 'keystone:identity-service'
+
+  - - 'placement:placement'
+    - 'nova-cloud-controller:placement'
+
+  - - 'vault:shared-db'
+    - 'vault-mysql-router:shared-db'
+  - - 'vault-mysql-router:db-router'
+    - 'mysql-innodb-cluster:db-router'
+
+  - - 'vault:certificates'
+    - 'neutron-api:certificates'
+
+  - - 'vault:certificates'
+    - 'glance:certificates'
+
+  - - 'vault:certificates'
+    - 'keystone:certificates'
+
+  - - 'vault:certificates'
+    - 'nova-cloud-controller:certificates'
+
+  - - 'vault:certificates'
+    - 'placement:certificates'
+
+  - - 'magnum:shared-db'
+    - 'magnum-mysql-router:shared-db'
+  - - 'magnum-mysql-router:db-router'
+    - 'mysql-innodb-cluster:db-router'
+
+  - - 'magnum:amqp'
+    - 'rabbitmq-server:amqp'
+
+  - - 'magnum:identity-service'
+    - 'keystone:identity-service'
+
+  - - 'magnum:certificates'
+    - 'vault:certificates'
+
+  - - 'magnum:ha'
+    - 'magnum-hacluster:ha'
+
+  - - 'heat:amqp'
+    - 'rabbitmq-server:amqp'
+
+  - - 'heat:identity-service'
+    - 'keystone:identity-service'
+
+  - - 'heat:shared-db'
+    - 'heat-mysql-router:shared-db'
+  - - 'heat-mysql-router:db-router'
+    - 'mysql-innodb-cluster:db-router'
+
+  - - 'heat:certificates'
+    - 'vault:certificates'
+
+  - - 'barbican:amqp'
+    - 'rabbitmq-server:amqp'
+
+  - - 'barbican:identity-service'
+    - 'keystone:identity-service'
+
+  - - 'barbican:shared-db'
+    - 'barbican-mysql-router:shared-db'
+  - - 'barbican-mysql-router:db-router'
+    - 'mysql-innodb-cluster:db-router'
+
+  - - 'barbican:certificates'
+    - 'vault:certificates'

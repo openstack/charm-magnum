@@ -8,6 +8,10 @@ gate_bundles:
 - focal-ussuri
 - focal-victoria
 
+dev_bundles:
+- focal-xena
+- impish-xena
+
 configure:
 - zaza.openstack.charm_tests.vault.setup.auto_initialize
 - zaza.openstack.charm_tests.glance.setup.add_cirros_image
@@ -31,3 +35,7 @@ target_deploy_status:
   vault:
     workload-status: blocked
     workload-status-message: Vault needs to be initialized
+
+tests_options:
+  force_deploy:
+    - impish-xena
