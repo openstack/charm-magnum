@@ -31,7 +31,7 @@ machines:
 applications:
 
   percona-cluster:
-    charm: cs:~openstack-charmers-next/percona-cluster
+    charm: cs:~openstack-charmers/percona-cluster
     num_units: 1
     options:
       source: *openstack-origin
@@ -39,24 +39,27 @@ applications:
       innodb-buffer-pool-size: 256M
     to:
       - '0'
+    channel: candidate
 
   rabbitmq-server:
-    charm: cs:~openstack-charmers-next/rabbitmq-server
+    charm: cs:~openstack-charmers/rabbitmq-server
     num_units: 1
     to:
       - '1'
+    channel: candidate
 
   nova-cloud-controller:
-    charm: cs:~openstack-charmers-next/nova-cloud-controller
+    charm: cs:~openstack-charmers/nova-cloud-controller
     num_units: 1
     options:
       openstack-origin: *openstack-origin
       network-manager: Neutron
     to:
       - '2'
+    channel: candidate
 
   neutron-api:
-    charm: cs:~openstack-charmers-next/neutron-api
+    charm: cs:~openstack-charmers/neutron-api
     num_units: 1
     options:
       manage-neutron-plugin-legacy-mode: true
@@ -66,45 +69,51 @@ applications:
       neutron-security-groups: true
     to:
       - '3'
+    channel: candidate
 
   keystone:
-    charm: cs:~openstack-charmers-next/keystone
+    charm: cs:~openstack-charmers/keystone
     num_units: 1
     options:
       openstack-origin: *openstack-origin
     to:
       - '4'
+    channel: candidate
 
   neutron-gateway:
-    charm: cs:~openstack-charmers-next/neutron-gateway
+    charm: cs:~openstack-charmers/neutron-gateway
     num_units: 1
     options:
       openstack-origin: *openstack-origin
       bridge-mappings: physnet1:br-ex
     to:
       - '5'
+    channel: candidate
 
   glance:
-    charm: cs:~openstack-charmers-next/glance
+    charm: cs:~openstack-charmers/glance
     num_units: 1
     options:
       openstack-origin: *openstack-origin
     to:
       - '6'
+    channel: candidate
 
   neutron-openvswitch:
-    charm: cs:~openstack-charmers-next/neutron-openvswitch
+    charm: cs:~openstack-charmers/neutron-openvswitch
+    channel: candidate
 
   placement:
-    charm: cs:~openstack-charmers-next/placement
+    charm: cs:~openstack-charmers/placement
     num_units: 1
     options:
       openstack-origin: *openstack-origin
     to:
       - '7'
+    channel: candidate
 
   nova-compute:
-    charm: cs:~openstack-charmers-next/nova-compute
+    charm: cs:~openstack-charmers/nova-compute
     num_units: 2
     storage:
       ephemeral-device: '40G'
@@ -113,12 +122,14 @@ applications:
     to:
       - '8'
       - '9'
+    channel: candidate
 
   vault:
-    charm: cs:~openstack-charmers-next/vault
+    charm: cs:~openstack-charmers/vault
     num_units: 1
     to:
       - '10'
+    channel: candidate
 
   magnum:
     charm: ../../../magnum
@@ -131,27 +142,30 @@ applications:
       - '13'
 
   magnum-hacluster:
-    charm: cs:~openstack-charmers-next/hacluster
+    charm: cs:~openstack-charmers/hacluster
     num_units: 0
     options:
       corosync_transport: unicast
       cluster_count: 3
+    channel: candidate
 
   heat:
-    charm: cs:~openstack-charmers-next/heat
+    charm: cs:~openstack-charmers/heat
     num_units: 1
     options:
       openstack-origin: *openstack-origin
     to:
       - '14'
+    channel: candidate
 
   barbican:
-    charm: cs:~openstack-charmers-next/barbican
+    charm: cs:~openstack-charmers/barbican
     num_units: 1
     options:
       openstack-origin: *openstack-origin
     to:
       - '15'
+    channel: candidate
 
 relations:
 
