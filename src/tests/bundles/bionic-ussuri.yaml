@@ -39,14 +39,12 @@ applications:
       innodb-buffer-pool-size: 256M
     to:
       - '0'
-    channel: candidate
 
   rabbitmq-server:
     charm: cs:~openstack-charmers/rabbitmq-server
     num_units: 1
     to:
       - '1'
-    channel: candidate
 
   nova-cloud-controller:
     charm: cs:~openstack-charmers/nova-cloud-controller
@@ -56,7 +54,6 @@ applications:
       network-manager: Neutron
     to:
       - '2'
-    channel: candidate
 
   neutron-api:
     charm: cs:~openstack-charmers/neutron-api
@@ -69,7 +66,6 @@ applications:
       neutron-security-groups: true
     to:
       - '3'
-    channel: candidate
 
   keystone:
     charm: cs:~openstack-charmers/keystone
@@ -78,7 +74,6 @@ applications:
       openstack-origin: *openstack-origin
     to:
       - '4'
-    channel: candidate
 
   neutron-gateway:
     charm: cs:~openstack-charmers/neutron-gateway
@@ -88,7 +83,6 @@ applications:
       bridge-mappings: physnet1:br-ex
     to:
       - '5'
-    channel: candidate
 
   glance:
     charm: cs:~openstack-charmers/glance
@@ -97,11 +91,9 @@ applications:
       openstack-origin: *openstack-origin
     to:
       - '6'
-    channel: candidate
 
   neutron-openvswitch:
     charm: cs:~openstack-charmers/neutron-openvswitch
-    channel: candidate
 
   placement:
     charm: cs:~openstack-charmers/placement
@@ -110,7 +102,6 @@ applications:
       openstack-origin: *openstack-origin
     to:
       - '7'
-    channel: candidate
 
   nova-compute:
     charm: cs:~openstack-charmers/nova-compute
@@ -122,14 +113,12 @@ applications:
     to:
       - '8'
       - '9'
-    channel: candidate
 
   vault:
     charm: cs:~openstack-charmers/vault
     num_units: 1
     to:
       - '10'
-    channel: candidate
 
   magnum:
     charm: ../../../magnum
@@ -147,7 +136,6 @@ applications:
     options:
       corosync_transport: unicast
       cluster_count: 3
-    channel: candidate
 
   heat:
     charm: cs:~openstack-charmers/heat
@@ -156,7 +144,6 @@ applications:
       openstack-origin: *openstack-origin
     to:
       - '14'
-    channel: candidate
 
   barbican:
     charm: cs:~openstack-charmers/barbican
@@ -165,7 +152,6 @@ applications:
       openstack-origin: *openstack-origin
     to:
       - '15'
-    channel: candidate
 
 relations:
 
