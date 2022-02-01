@@ -1,6 +1,8 @@
 variables:
   openstack-origin: &openstack-origin cloud:focal-xena
 
+local_overlay_enabled: False
+
 series: focal
 
 comment:
@@ -164,7 +166,7 @@ applications:
     channel: latest/edge
 
   magnum:
-    charm: ../../../magnum
+    charm: ../../../magnum.charm
     num_units: 3
     options:
       openstack-origin: *openstack-origin
