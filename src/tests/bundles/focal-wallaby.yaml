@@ -1,7 +1,9 @@
-variables:
-  openstack-origin: &openstack-origin cloud:bionic-ussuri
+local_overlay_enabled: False
 
-series: bionic
+variables:
+  openstack-origin: &openstack-origin cloud:focal-wallaby
+
+series: focal
 
 comment:
 - 'machines section to decide order of deployment. database sooner = faster'
@@ -9,54 +11,89 @@ machines:
   '0':
     constraints: mem=3072M
   '1':
+    constraints: mem=3072M
   '2':
+    constraints: mem=3072M
   '3':
   '4':
   '5':
   '6':
   '7':
+  '8':
+  '9':
   # the following machines are for nova-compute which needs more memory
   # for the instances.
-  '8':
-    constraints: mem=4096M cores=4
-  '9':
-    constraints: mem=4096M cores=4
   '10':
+    constraints: mem=4096M cores=4
   '11':
+    constraints: mem=4096M cores=4
   '12':
   '13':
   '14':
   '15':
+  '16':
+  '17':
 
 applications:
 
-  percona-cluster:
-    charm: cs:~openstack-charmers/percona-cluster
-    num_units: 1
+  nova-cloud-controller-mysql-router:
+    charm: ch:mysql-router
+    channel: 8.0.19/edge
+  neutron-api-mysql-router:
+    charm: ch:mysql-router
+    channel: 8.0.19/edge
+  keystone-mysql-router:
+    charm: ch:mysql-router
+    channel: 8.0.19/edge
+  glance-mysql-router:
+    charm: ch:mysql-router
+    channel: 8.0.19/edge
+  placement-mysql-router:
+    charm: ch:mysql-router
+    channel: 8.0.19/edge
+  vault-mysql-router:
+    charm: ch:mysql-router
+    channel: 8.0.19/edge
+  magnum-mysql-router:
+    charm: ch:mysql-router
+    channel: 8.0.19/edge
+  heat-mysql-router:
+    charm: ch:mysql-router
+    channel: 8.0.19/edge
+  barbican-mysql-router:
+    charm: ch:mysql-router
+    channel: 8.0.19/edge
+
+  mysql-innodb-cluster:
+    charm: ch:mysql-innodb-cluster
+    num_units: 3
     options:
       source: *openstack-origin
-      max-connections: 1000
-      innodb-buffer-pool-size: 256M
     to:
       - '0'
+      - '1'
+      - '2'
+    channel: 8.0.19/edge
 
   rabbitmq-server:
-    charm: cs:~openstack-charmers/rabbitmq-server
+    charm: ch:rabbitmq-server
     num_units: 1
     to:
-      - '1'
+      - '3'
+    channel: 3.8/edge
 
   nova-cloud-controller:
-    charm: cs:~openstack-charmers/nova-cloud-controller
+    charm: ch:nova-cloud-controller
     num_units: 1
     options:
       openstack-origin: *openstack-origin
       network-manager: Neutron
     to:
-      - '2'
+      - '4'
+    channel: xena/edge
 
   neutron-api:
-    charm: cs:~openstack-charmers/neutron-api
+    charm: ch:neutron-api
     num_units: 1
     options:
       manage-neutron-plugin-legacy-mode: true
@@ -65,93 +102,104 @@ applications:
       flat-network-providers: physnet1
       neutron-security-groups: true
     to:
-      - '3'
+      - '5'
+    channel: xena/edge
 
   keystone:
-    charm: cs:~openstack-charmers/keystone
-    num_units: 1
-    options:
-      openstack-origin: *openstack-origin
-    to:
-      - '4'
-
-  neutron-gateway:
-    charm: cs:~openstack-charmers/neutron-gateway
-    num_units: 1
-    options:
-      openstack-origin: *openstack-origin
-      bridge-mappings: physnet1:br-ex
-    to:
-      - '5'
-
-  glance:
-    charm: cs:~openstack-charmers/glance
+    charm: ch:keystone
     num_units: 1
     options:
       openstack-origin: *openstack-origin
     to:
       - '6'
+    channel: xena/edge
 
-  neutron-openvswitch:
-    charm: cs:~openstack-charmers/neutron-openvswitch
+  neutron-gateway:
+    charm: ch:neutron-gateway
+    num_units: 1
+    options:
+      openstack-origin: *openstack-origin
+      bridge-mappings: physnet1:br-ex
+    to:
+      - '7'
+    channel: xena/edge
 
-  placement:
-    charm: cs:~openstack-charmers/placement
+  glance:
+    charm: ch:glance
     num_units: 1
     options:
       openstack-origin: *openstack-origin
     to:
-      - '7'
+      - '8'
+    channel: xena/edge
+
+  neutron-openvswitch:
+    charm: ch:neutron-openvswitch
+    channel: xena/edge
+
+  placement:
+    charm: ch:placement
+    num_units: 1
+    options:
+      openstack-origin: *openstack-origin
+    to:
+      - '9'
+    channel: xena/edge
 
   nova-compute:
-    charm: cs:~openstack-charmers/nova-compute
+    charm: ch:nova-compute
     num_units: 2
     storage:
       ephemeral-device: '40G'
     options:
       openstack-origin: *openstack-origin
     to:
-      - '8'
-      - '9'
+      - '10'
+      - '11'
+    channel: xena/edge
 
   vault:
-    charm: cs:~openstack-charmers/vault
+    charm: ch:vault
     num_units: 1
     to:
-      - '10'
+      - '12'
+    channel: 1.7/edge
 
   magnum:
-    charm: ../../../magnum
+    charm: ../../../magnum.charm
     num_units: 3
     options:
       openstack-origin: *openstack-origin
     to:
-      - '11'
-      - '12'
       - '13'
+      - '14'
+      - '15'
 
   magnum-hacluster:
-    charm: cs:~openstack-charmers/hacluster
+    charm: ch:hacluster
     num_units: 0
     options:
       corosync_transport: unicast
       cluster_count: 3
+    channel: 2.0.3/edge
 
   heat:
-    charm: cs:~openstack-charmers/heat
+    charm: ch:heat
     num_units: 1
     options:
       openstack-origin: *openstack-origin
     to:
-      - '14'
+      - '16'
+    channel: xena/edge
 
   barbican:
-    charm: cs:~openstack-charmers/barbican
+    charm: ch:barbican
     num_units: 1
     options:
       openstack-origin: *openstack-origin
     to:
-      - '15'
+      - '17'
+    channel: xena/edge
 
 relations:
 
@@ -162,7 +210,9 @@ relations:
     - 'rabbitmq-server:amqp'
 
   - - 'nova-cloud-controller:shared-db'
-    - 'percona-cluster:shared-db'
+    - 'nova-cloud-controller-mysql-router:shared-db'
+  - - 'nova-cloud-controller-mysql-router:db-router'
+    - 'mysql-innodb-cluster:db-router'
 
   - - 'nova-cloud-controller:identity-service'
     - 'keystone:identity-service'
@@ -177,13 +227,16 @@ relations:
     - 'glance:image-service'
 
   - - 'keystone:shared-db'
-    - 'percona-cluster:shared-db'
-
+    - 'keystone-mysql-router:shared-db'
+  - - 'keystone-mysql-router:db-router'
+    - 'mysql-innodb-cluster:db-router'
   - - 'glance:identity-service'
     - 'keystone:identity-service'
 
   - - 'glance:shared-db'
-    - 'percona-cluster:shared-db'
+    - 'glance-mysql-router:shared-db'
+  - - 'glance-mysql-router:db-router'
+    - 'mysql-innodb-cluster:db-router'
 
   - - 'glance:amqp'
     - 'rabbitmq-server:amqp'
@@ -195,7 +248,9 @@ relations:
     - 'neutron-gateway:quantum-network-service'
 
   - - 'neutron-api:shared-db'
-    - 'percona-cluster:shared-db'
+    - 'neutron-api-mysql-router:shared-db'
+  - - 'neutron-api-mysql-router:db-router'
+    - 'mysql-innodb-cluster:db-router'
 
   - - 'neutron-api:amqp'
     - 'rabbitmq-server:amqp'
@@ -213,7 +268,9 @@ relations:
     - 'neutron-openvswitch:amqp'
 
   - - 'placement:shared-db'
-    - 'percona-cluster:shared-db'
+    - 'placement-mysql-router:shared-db'
+  - - 'placement-mysql-router:db-router'
+    - 'mysql-innodb-cluster:db-router'
 
   - - 'placement:identity-service'
     - 'keystone:identity-service'
@@ -222,7 +279,9 @@ relations:
     - 'nova-cloud-controller:placement'
 
   - - 'vault:shared-db'
-    - 'percona-cluster:shared-db'
+    - 'vault-mysql-router:shared-db'
+  - - 'vault-mysql-router:db-router'
+    - 'mysql-innodb-cluster:db-router'
 
   - - 'vault:certificates'
     - 'neutron-api:certificates'
@@ -240,7 +299,9 @@ relations:
     - 'placement:certificates'
 
   - - 'magnum:shared-db'
-    - 'percona-cluster:shared-db'
+    - 'magnum-mysql-router:shared-db'
+  - - 'magnum-mysql-router:db-router'
+    - 'mysql-innodb-cluster:db-router'
 
   - - 'magnum:amqp'
     - 'rabbitmq-server:amqp'
@@ -261,7 +322,9 @@ relations:
     - 'keystone:identity-service'
 
   - - 'heat:shared-db'
-    - 'percona-cluster:shared-db'
+    - 'heat-mysql-router:shared-db'
+  - - 'heat-mysql-router:db-router'
+    - 'mysql-innodb-cluster:db-router'
 
   - - 'heat:certificates'
     - 'vault:certificates'
@@ -273,7 +336,9 @@ relations:
     - 'keystone:identity-service'
 
   - - 'barbican:shared-db'
-    - 'percona-cluster:shared-db'
+    - 'barbican-mysql-router:shared-db'
+  - - 'barbican-mysql-router:db-router'
+    - 'mysql-innodb-cluster:db-router'
 
   - - 'barbican:certificates'
     - 'vault:certificates'

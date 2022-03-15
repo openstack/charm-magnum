@@ -1,12 +1,10 @@
 charm_name: magnum
 
 smoke_bundles:
-- focal-victoria
+  - focal-xena
 
 gate_bundles:
-- bionic-ussuri
-- focal-ussuri
-- focal-victoria
+  - focal-wallaby
 
 configure:
 - zaza.openstack.charm_tests.vault.setup.auto_initialize
