@@ -38,31 +38,31 @@ applications:
 
   nova-cloud-controller-mysql-router:
     charm: ch:mysql-router
-    channel: 8.0.19/edge
+    channel: 8.0/edge
   neutron-api-mysql-router:
     charm: ch:mysql-router
-    channel: 8.0.19/edge
+    channel: 8.0/edge
   keystone-mysql-router:
     charm: ch:mysql-router
-    channel: 8.0.19/edge
+    channel: 8.0/edge
   glance-mysql-router:
     charm: ch:mysql-router
-    channel: 8.0.19/edge
+    channel: 8.0/edge
   placement-mysql-router:
     charm: ch:mysql-router
-    channel: 8.0.19/edge
+    channel: 8.0/edge
   vault-mysql-router:
     charm: ch:mysql-router
-    channel: 8.0.19/edge
+    channel: 8.0/edge
   magnum-mysql-router:
     charm: ch:mysql-router
-    channel: 8.0.19/edge
+    channel: 8.0/edge
   heat-mysql-router:
     charm: ch:mysql-router
-    channel: 8.0.19/edge
+    channel: 8.0/edge
   barbican-mysql-router:
     charm: ch:mysql-router
-    channel: 8.0.19/edge
+    channel: 8.0/edge
 
   mysql-innodb-cluster:
     charm: ch:mysql-innodb-cluster
@@ -73,7 +73,7 @@ applications:
       - '0'
       - '1'
       - '2'
-    channel: 8.0.19/edge
+    channel: 8.0/edge
 
   rabbitmq-server:
     charm: ch:rabbitmq-server
