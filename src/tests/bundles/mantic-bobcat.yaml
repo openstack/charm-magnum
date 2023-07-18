@@ -3,7 +3,7 @@ variables:
 
 local_overlay_enabled: True
 
-series: lunar
+series: mantic
 
 comment:
 - 'machines section to decide order of deployment. database sooner = faster'

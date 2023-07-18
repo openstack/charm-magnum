@@ -76,6 +76,8 @@ class TestMagnumHandlers(test_utils.PatchHelper):
 
     def setUp(self):
         super().setUp()
+        self.patch('charmhelpers.core.hookenv.is_subordinate',
+                   return_value=False)
         self.patch_release(magnum.MagnumCharm.release)
         self.magnum_charm = mock.MagicMock()
         self.patch_object(handlers.charm, 'provide_charm_instance',
