@@ -50,6 +50,16 @@ options:
     type: string
     default: magnum_domain_admin
     description: Domain admin for the trustee-domain
+  cluster-user-trust:
+    type: boolean
+    default: False
+    description: |
+      Controls whether to assign a trust to the cluster user or not. You will
+      need to set it to True for clusters with volume_driver=cinder or
+      registry_enabled=true in the underlying cluster template to work. This is
+      a potential security risk since the trust gives instances OpenStack API
+      access to the cluster's project. Note that this setting does not affect
+      per-cluster trusts assigned to the Magnum service user.
   cert-manager-type:
     type: string
     default: barbican
