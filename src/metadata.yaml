@@ -9,8 +9,6 @@ description: |
   machines or bare metal in a cluster configuration.
 tags:
   - openstack
-series:
-  - jammy
 subordinate: false
 requires:
   shared-db:
