@@ -23,6 +23,8 @@ MAGNUM_CONF = os.path.join(MAGNUM_DIR, 'magnum.conf')
 MAGNUM_PASTE_API = os.path.join(MAGNUM_DIR, 'api-paste.ini')
 KEYSTONE_POLICY = os.path.join(MAGNUM_DIR, 'keystone_auth_default_policy.json')
 POLICY = os.path.join(MAGNUM_DIR, 'policy.json')
+VALID_NOTIFICATION_DRIVERS = [
+    'messaging', 'messagingv2', 'routing', 'log', 'test', 'noop']
 
 MAGNUM_SERVICES = [
     'magnum-api',
@@ -46,6 +48,15 @@ def ca_file_path(arg):
         ch_host.CA_CERT_DIR, "{}.crt".format(ch_hookenv.service_name()))
     if os.path.exists(file_path):
         return file_path
+    return ''
+
+
+@adapters.config_property
+def oslo_notification_driver(arg):
+    driver = ch_hookenv.config().get(
+        'notification-driver')
+    if driver in VALID_NOTIFICATION_DRIVERS:
+        return driver
     return ''
 
 
@@ -167,3 +178,21 @@ class MagnumCharm(charms_openstack.charm.HAOpenStackCharm):
     def local_unit_name(self):
         """Return local unit name as provided by our ConfigurationClass."""
         return self.configuration_class().local_unit_name
+
+    def _validate_notification_driver(self):
+        driver = self.config.get('notification-driver')
+        if driver not in VALID_NOTIFICATION_DRIVERS:
+            raise ValueError(
+                'Notification driver %s is not valid. Valid '
+                'notifications drivers are: %s' % (
+                    driver, ", ".join(VALID_NOTIFICATION_DRIVERS))
+            )
+
+    def custom_assess_status_check(self):
+        try:
+            self._validate_notification_driver()
+        except Exception as err:
+            msg = ('Invalid notification driver: %s' % err)
+            return 'blocked', msg
+
+        return (None, None)

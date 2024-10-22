@@ -15,7 +15,7 @@
 import mock
 
 import charms_openstack.test_utils as test_utils
-
+import charmhelpers.core.hookenv as hookenv
 import charm.openstack.magnum.magnum as magnum
 
 
@@ -25,6 +25,8 @@ class Helper(test_utils.PatchHelper):
         super().setUp()
         self.patch('charmhelpers.core.hookenv.is_subordinate',
                    return_value=False)
+        self.patch('charmhelpers.core.hookenv.config',
+                   return_value={})
         self.patch_release(magnum.MagnumCharm.release)
 
 
@@ -43,6 +45,33 @@ class TestMagnumCharmConfigProperties(Helper):
         self.ca_cert_file.return_value = '/certs/magnum.crt'
         ca_file = magnum.ca_file_path(cls)
         self.assertEqual('/certs/magnum.crt', ca_file)
+
+    def test_validate_notification_driver(self):
+        hookenv.config.return_value = {
+            'notification-driver': 'bogus'
+        }
+        target = magnum.MagnumCharm()
+        with self.assertRaises(ValueError):
+            target._validate_notification_driver()
+
+    def test_custom_assess_status_check(self):
+        hookenv.config.return_value = {
+            'notification-driver': 'messaging'
+        }
+        target = magnum.MagnumCharm()
+        self.assertEqual(target.custom_assess_status_check(), (None, None))
+
+    def test_custom_assess_status_check_invalid(self):
+        hookenv.config.return_value = {
+            'notification-driver': 'bogus',
+        }
+        target = magnum.MagnumCharm()
+        expectedStatus = (
+            'blocked',
+            'Invalid notification driver: Notification driver bogus '
+            'is not valid. Valid notifications drivers are: messaging, '
+            'messagingv2, routing, log, test, noop')
+        self.assertEqual(target.custom_assess_status_check(), expectedStatus)
 
 
 class TestMagnumCharm(Helper):

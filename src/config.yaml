@@ -68,3 +68,14 @@ options:
       to be present in your OpenStack deployment. Choices are:
         * x509keypair
         * barbican
+  notification-driver:
+    type: string
+    default: "messaging"
+    description: |
+      The Oslo messaging notification driver option to be used. Choices are:
+        * messaging
+        * messagingv2
+        * routing
+        * log
+        * test
+        * noop
