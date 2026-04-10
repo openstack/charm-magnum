@@ -11,6 +11,7 @@ parts:
     build-environment:
       - CHARM_INTERFACES_DIR: /root/project/interfaces/
       - CHARM_LAYERS_DIR: /root/project/layers/
+      - PIP_CONSTRAINT: /root/project/src/constraints.txt
 
 base: ubuntu@24.04
 platforms:
