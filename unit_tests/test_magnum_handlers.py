@@ -18,6 +18,7 @@ import charm.openstack.magnum.magnum as magnum
 import reactive.magnum_handlers as handlers
 
 import charms_openstack.test_utils as test_utils
+import charms_openstack.charm.core as co
 
 
 class TestRegisteredHooks(test_utils.TestRegisteredHooks):
@@ -77,6 +78,9 @@ class TestMagnumHandlers(test_utils.PatchHelper):
     def setUp(self):
         super().setUp()
         self.patch_release(magnum.MagnumCharm.release)
+        co._singleton = None
+        self.patch_object(co, "_release_selector_function",
+                          new=lambda: magnum.MagnumCharm.release)
         self.magnum_charm = mock.MagicMock()
         self.patch_object(handlers.charm, 'provide_charm_instance',
                           new=mock.MagicMock())
