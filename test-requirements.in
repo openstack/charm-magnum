@@ -8,7 +8,7 @@ pyparsing<3.0.0  # aodhclient is pinned in zaza and needs pyparsing < 3.0.0, but
 stestr>=2.2.0
 
 # Fix: cliff<3.0.0 depends on pkg_resources, remove this pin
-setuptools
+setuptools<82.0.0
 
 requests>=2.18.4
 charms.reactive
@@ -34,3 +34,4 @@ cryptography<3.4 # vault, keystone-saml-mellon
 lxml             # keystone-saml-mellon
 hvac             # vault, barbican-vault
 psutil           # cinder-lvm
+flake8==7.1.1
