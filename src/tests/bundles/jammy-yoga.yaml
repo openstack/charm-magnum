@@ -161,7 +161,7 @@ applications:
     num_units: 1
     to:
       - '12'
-    channel: latest/edge
+    channel: 1.8/stable
 
   magnum:
     charm: ../../../magnum_ubuntu@22.04-amd64.charm
